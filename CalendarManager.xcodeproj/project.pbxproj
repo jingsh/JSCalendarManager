@@ -14,6 +14,8 @@
 		8E1CD36E1B2E230700FDAA13 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E1CD36D1B2E230700FDAA13 /* Images.xcassets */; };
 		8E1CD3711B2E230700FDAA13 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E1CD36F1B2E230700FDAA13 /* LaunchScreen.xib */; };
 		8E1CD37D1B2E230700FDAA13 /* CalendarManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CD37C1B2E230700FDAA13 /* CalendarManagerTests.m */; };
+		8E1CD3891B2E234D00FDAA13 /* JSCalendarManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CD3881B2E234D00FDAA13 /* JSCalendarManager.m */; };
+		8E1CD38B1B2E238600FDAA13 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E1CD38A1B2E238600FDAA13 /* EventKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,9 @@
 		8E1CD3761B2E230700FDAA13 /* CalendarManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalendarManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E1CD37B1B2E230700FDAA13 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E1CD37C1B2E230700FDAA13 /* CalendarManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CalendarManagerTests.m; sourceTree = "<group>"; };
+		8E1CD3871B2E234D00FDAA13 /* JSCalendarManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSCalendarManager.h; path = JSCalendarManager/JSCalendarManager.h; sourceTree = SOURCE_ROOT; };
+		8E1CD3881B2E234D00FDAA13 /* JSCalendarManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSCalendarManager.m; path = JSCalendarManager/JSCalendarManager.m; sourceTree = SOURCE_ROOT; };
+		8E1CD38A1B2E238600FDAA13 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E1CD38B1B2E238600FDAA13 /* EventKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +69,7 @@
 		8E1CD3541B2E230700FDAA13 = {
 			isa = PBXGroup;
 			children = (
+				8E1CD38A1B2E238600FDAA13 /* EventKit.framework */,
 				8E1CD35F1B2E230700FDAA13 /* CalendarManager */,
 				8E1CD3791B2E230700FDAA13 /* CalendarManagerTests */,
 				8E1CD35E1B2E230700FDAA13 /* Products */,
@@ -81,6 +88,7 @@
 		8E1CD35F1B2E230700FDAA13 /* CalendarManager */ = {
 			isa = PBXGroup;
 			children = (
+				8E1CD3861B2E231600FDAA13 /* JSCalendarManager */,
 				8E1CD3641B2E230700FDAA13 /* AppDelegate.h */,
 				8E1CD3651B2E230700FDAA13 /* AppDelegate.m */,
 				8E1CD3671B2E230700FDAA13 /* ViewController.h */,
@@ -117,6 +125,15 @@
 				8E1CD37B1B2E230700FDAA13 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8E1CD3861B2E231600FDAA13 /* JSCalendarManager */ = {
+			isa = PBXGroup;
+			children = (
+				8E1CD3871B2E234D00FDAA13 /* JSCalendarManager.h */,
+				8E1CD3881B2E234D00FDAA13 /* JSCalendarManager.m */,
+			);
+			name = JSCalendarManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,6 +236,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E1CD3891B2E234D00FDAA13 /* JSCalendarManager.m in Sources */,
 				8E1CD3691B2E230700FDAA13 /* ViewController.m in Sources */,
 				8E1CD3661B2E230700FDAA13 /* AppDelegate.m in Sources */,
 				8E1CD3631B2E230700FDAA13 /* main.m in Sources */,
