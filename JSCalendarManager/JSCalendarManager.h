@@ -13,6 +13,9 @@ static NSString *JSCalendarManagerErrorDomain = @"JSCalendarManagerErrorDomain";
 
 typedef enum:NSInteger{
 	kErrorCalendarAccessNotGranted = 1001,
+	kErrorICloudCalendarNotAvailable,
+	kErrorCalendarSourceNotAvailable,
+	kErrorCalendarDoesNotExist,
 }JSCalendarManagerErrorCode;
 
 typedef void (^calendarOperationCompletionHandler)(BOOL success, NSError *error, NSString *calendarIdentifier);
@@ -35,6 +38,8 @@ typedef void (^eventsOperationCompletionHandler)(BOOL success, NSError *error, N
 -(NSArray *)nonBirthDayCalendars;
 
 -(NSArray *)iCloudCalendars;
+
+-(void)setDefaultCalendar:(NSString *)calendarIdentifier;
 
 -(void)createCalendar:(NSString *)calendarTitle
 			   iCloud:(BOOL)icloud
