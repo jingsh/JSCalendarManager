@@ -55,6 +55,13 @@ You should prompt user for permissions or notify them that they should enable ca
 	else{
 		NSLog(@"%@",error);
 		//do some error handling here.
+		if ([error.domain isEqualToString:JSCalendarManagerErrorDomain]) {
+			if (error.code == kErrorCalendarAccessNotGranted) {
+				//do something, for example prompt an alert to user
+				UIAlertView *alert = [UIAlertView alloc]initWithTitle:@"Needs calendar access" message:@"The app needs to access to your calendar. Please go the Settings app to turn on the permission." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+				[alert show];
+			}
+		}
 	}];
 ```
 
