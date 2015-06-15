@@ -21,6 +21,7 @@ typedef enum:NSInteger{
 
 typedef void (^calendarOperationCompletionHandler)(BOOL success, NSError *error, NSString *calendarIdentifier);
 typedef void (^eventsOperationCompletionHandler)(BOOL success, NSError *error, NSString *eventIdentifier);
+typedef void (^eventSearchHandler)(BOOL found, NSError *error, NSArray *eventsArray);
 
 @interface JSCalendarManager : NSObject
 
@@ -200,5 +201,16 @@ typedef void (^eventsOperationCompletionHandler)(BOOL success, NSError *error, N
  */
 -(void)deleteEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler;
 
+/*!
+ @method     isEvent: inCalendarWithSearchHandler:
+ @discussion Call this method to determine whether an event is in the database.
+ */
+-(void)isEvent:(NSString *)eventIdentifier inCalendarWithSearchHandler:(eventSearchHandler)handler;
+
+/*!
+ @method     findEventsBetween: and: withSearchHandler:
+ @discussion Call this method to find all events in the specified date range.
+ */
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler;
 
 @end

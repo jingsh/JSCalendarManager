@@ -362,6 +362,49 @@ typedef enum:NSInteger{
 	handler(success,error,eventIdentifier);
 }
 
+#pragma mark - Event search operations
+-(void)isEvent:(NSString *)eventIdentifier inCalendarWithSearchHandler:(eventSearchHandler)handler
+{
+	NSError *error = nil;
+	if (![JSCalendarManager calendarAccessGranted]) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
+	if (event) {
+		handler(YES,error,@[event]);
+	}else{
+		handler(NO,error,nil);
+	}
+}
 
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler
+{
+	NSError *error = nil;
+	if (![JSCalendarManager calendarAccessGranted]) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	
+	NSPredicate *searchPredicate = [self.eventStore predicateForEventsWithStartDate:start endDate:end calendars:@[self.calendar]];
+	
+	NSArray *events = [self.eventStore eventsMatchingPredicate:searchPredicate];
+	
+	if (events) {
+		handler(YES,error,events);
+	}else{
+		handler(NO,error,events);
+	}
+}
 
 @end
