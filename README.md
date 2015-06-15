@@ -22,10 +22,43 @@ JSCalendarManager *manager = [JSCalendarManager sharedManager];
 ```objective-C
 JSCalendarManager *manager = [[JSCalendarManager alloc]init];
 ```
-## Check calendar permissions
-Be sure to call `requestCalendarAccessWithCompletionHandler:` method before you do anything with calendar operation or event operation.
+## Defined completion handlers
+The class defined three completion handler blocks, the definition are pretty self explanatory. 
+### Calendar operation handler block
+```objective-C
+typedef void (^calendarOperationCompletionHandler)(BOOL success, NSError *error, NSString *calendarIdentifier);
+```
+The block is called by the calendar operations, such as create or delete calendars in the device's calendar database. It includes a `BOOL success` flag, a `NSError *error` object indicating any errors, and a `NSString *calendarIdentifier` (if any) to indicate which calendar is being created/deleted.
 
-There are also three methods you can use to check the calendar permissions your app has.
+### Events operation handler block
+```objective-C
+typedef void (^eventsOperationCompletionHandler)(BOOL success, NSError *error, NSString *eventIdentifier);
+```
+The block is called by event operation methods, such as create/update/delete events in the selected calendar.  It includes a `BOOL success` flag, a `NSError *error` object indicating any errors, and a `NSString *calendarIdentifier` (if any) to indicate the event being created/updated/deleted.
+
+### Event search handler block
+```objective-C
+typedef void (^eventSearchHandler)(BOOL found, NSError *error, NSArray *eventsArray);
+```
+The block is called by event searching methods. It includes a `BOOL found` flag, a `NSError *error` object for any errors (`nil` if no errors), and an array of events that being found (`nil` if not found).
+
+## Check/Request calendar permissions
+**You MUST call `requestCalendarAccessWithCompletionHandler:` method before you do anything with calendar or events.**
+
+You should prompt user for permissions or notify them that they should enable calendar access from the *Settings* app if they explicitly denied the access before. Example:
+```objective-C
+[manager requestCalendarAccessWithCompletionHandler:^(BOOL granted, NSError *error){
+	if (granted) {
+		NSLog("Granted by user when the system ask-for-permission prompt is shown. Or the user already granted permission before.");	
+		//do something else here.
+	}
+	else{
+		NSLog(@"%@",error);
+		//do some error handling here.
+	}];
+```
+
+There are also three methods you can use to check the calendar permissions your app has, and implement your own calendar permission logic based on returned value. The methods are pretty self explanatory.
 ```objective-C
 /*!
  @method     calendarAccessGranted
@@ -44,6 +77,13 @@ There are also three methods you can use to check the calendar permissions your 
  @discussion Returns whether the user has denied or limited the access to calendar.
  */
 +(BOOL)shouldGrantAccessManually;
+```
+**Note:** if the user has explicitly turned off the permisson to calendar before, you can use `shouldGrantAccessManually` method to check this, and prompt an alert view explaining the necessity of access to calendar and show instructions how to turn the permission back on.
+```objective-C
+	if([manager shouldGrantAccessManually]){
+		UIAlertView *alert = [UIAlertView alloc]initWithTitle:@"Needs calendar access" message:@"The app needs to access to your calendar. Please go the Settings app to turn on the permission." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+		[alert show];
+	}
 ```
 
 ## Calendar operations
@@ -85,3 +125,31 @@ for (EKCalendar *cal in calendars){
   //do something here.
 }
 ```  
+
+## TODO:
+1. More documentation.
+2. Add support for reminders.
+3. Swift version.
+
+## License
+The MIT License (MIT)
+
+Copyright (c) 2015 Jing Shan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
