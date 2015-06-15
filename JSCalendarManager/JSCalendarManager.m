@@ -40,7 +40,9 @@ typedef enum:NSInteger{
 	self = [super init];
 	if (self) {
 		self.eventStore = [[EKEventStore alloc]init];
-		self.calendar = [self.eventStore defaultCalendarForNewEvents];
+		if ([JSCalendarManager calendarAccessGranted]) {
+			self.calendar = [self.eventStore defaultCalendarForNewEvents];
+		}
 	}
 	return self;
 }
@@ -394,7 +396,6 @@ typedef enum:NSInteger{
 		handler(NO,error,nil);
 		return;
 	}
-	
 	
 	NSPredicate *searchPredicate = [self.eventStore predicateForEventsWithStartDate:start endDate:end calendars:@[self.calendar]];
 	

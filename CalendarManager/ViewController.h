@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UITableViewController
 
-
+-(IBAction)addCalendar:(id)sender;
+-(IBAction)addRandomEvents:(id)sender;
 @end
 

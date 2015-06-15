@@ -16,6 +16,7 @@
 		8E1CD37D1B2E230700FDAA13 /* CalendarManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CD37C1B2E230700FDAA13 /* CalendarManagerTests.m */; };
 		8E1CD3891B2E234D00FDAA13 /* JSCalendarManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CD3881B2E234D00FDAA13 /* JSCalendarManager.m */; };
 		8E1CD38B1B2E238600FDAA13 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E1CD38A1B2E238600FDAA13 /* EventKit.framework */; };
+		8E1CD38E1B2E6C1D00FDAA13 /* LoremIpsum.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CD38D1B2E6C1D00FDAA13 /* LoremIpsum.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,8 @@
 		8E1CD3871B2E234D00FDAA13 /* JSCalendarManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSCalendarManager.h; path = JSCalendarManager/JSCalendarManager.h; sourceTree = SOURCE_ROOT; };
 		8E1CD3881B2E234D00FDAA13 /* JSCalendarManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSCalendarManager.m; path = JSCalendarManager/JSCalendarManager.m; sourceTree = SOURCE_ROOT; };
 		8E1CD38A1B2E238600FDAA13 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		8E1CD38C1B2E6C1D00FDAA13 /* LoremIpsum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoremIpsum.h; sourceTree = "<group>"; };
+		8E1CD38D1B2E6C1D00FDAA13 /* LoremIpsum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoremIpsum.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +94,8 @@
 				8E1CD3861B2E231600FDAA13 /* JSCalendarManager */,
 				8E1CD3641B2E230700FDAA13 /* AppDelegate.h */,
 				8E1CD3651B2E230700FDAA13 /* AppDelegate.m */,
+				8E1CD38C1B2E6C1D00FDAA13 /* LoremIpsum.h */,
+				8E1CD38D1B2E6C1D00FDAA13 /* LoremIpsum.m */,
 				8E1CD3671B2E230700FDAA13 /* ViewController.h */,
 				8E1CD3681B2E230700FDAA13 /* ViewController.m */,
 				8E1CD36A1B2E230700FDAA13 /* Main.storyboard */,
@@ -237,6 +242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E1CD3891B2E234D00FDAA13 /* JSCalendarManager.m in Sources */,
+				8E1CD38E1B2E6C1D00FDAA13 /* LoremIpsum.m in Sources */,
 				8E1CD3691B2E230700FDAA13 /* ViewController.m in Sources */,
 				8E1CD3661B2E230700FDAA13 /* AppDelegate.m in Sources */,
 				8E1CD3631B2E230700FDAA13 /* main.m in Sources */,
