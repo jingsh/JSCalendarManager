@@ -1,8 +1,9 @@
 # JSCalendarManager
-An Objective-C class for common calendar and events operations. Requires `EventKit.framework`.
-```objective-C
-#import <EventKit/EventKit.h>
-```
+An Objective-C class for common calendar and events tasks. Like creating/deleting calendars, creating/updating/deleting events (`EKEntityTypeEvent`). Requires `EventKit.framework`.
+
+*Support for `EKEntityTypeReminder` will be in future versions.*
+
+You need to link the `EventKit.framework` in the target's build phase.
 
 ## How to install?
 Drag and drop `JSCalendarManager.h` and `JSCalendarManager.m` file into your project. 
@@ -20,7 +21,15 @@ JSCalendarManager *manager = [JSCalendarManager sharedManager];
 
 ### Or using in single controller or your data model.
 ```objective-C
-JSCalendarManager *manager = [[JSCalendarManager alloc]init];
+@interface yourClass
+@property (nonatomic, strong)JSCalendarManager *manager
+@end
+
+@implementation yourClass
+//...
+self.manager = [[JSCalendarManager alloc]init];
+//...
+@end
 ```
 ## Defined completion handlers
 The class defined three completion handler blocks, the definition are pretty self explanatory. 
@@ -94,7 +103,7 @@ There are also three methods you can use to check the calendar permissions your 
 ```
 
 ## Calendar operations
-### Create a customize calendar
+### Creating a customized calendar for your app
 You can create your own calendar for your app. There are two methods to do this.
 ```objective-C
 /*!
@@ -116,14 +125,16 @@ This method will creat a local/iCloud calendar with given name. You can also cre
 ```
 The completion handler will include a `(NSString *)eventIdentifier`, you should be responsible for saving this identifier in your app for future use.
 
-### Using availabe calendars
+### Using existing calendars available in the database
+#### Choose calendar to use with calendar identifier
 If you saved the calendar identifier before, you can set the calendar you want to use using
 ```objective-C
 [manager setUsingCalendar:KNOWN_CALENDAR_IDENTIFIER];
 ```
-You must set the calendar you wish to use, otherwise the default calendar in your app will be used. 
+You **must** set the calendar you wish to use, otherwise the default calendar in your app will be used. 
 If possible, we recommend creating your own calendar. Therefore, the user's other calendar will not be left alone, incase user accidentally deletes/messes their calendars/events.
 
+#### Choose calendar from a list of available calendars
 If you don't know the calendar identifier, don't worry, you can pull a list of calendars available on the device, and pick one or let user pick one.
 ```obejective-C
 	NSArray *calendars = [manager allCalendars];
@@ -132,6 +143,121 @@ If you don't know the calendar identifier, don't worry, you can pull a list of c
   		//do something here.
 	}
 ```  
+## Events operations (create, update, and delete)
+### Creating events
+There are two ways to creat events in the calendar.
+
+Both methods are self explanatory. The completion handler block returns a `NSString *eventIdentifier`, you are responsible to save this event identifier for future use, such as updating or deleting events. 
+```objective-C
+/*!
+ @method     createEvent: location: startTime: endTime: description: URL: completionHandler:
+ @discussion Call this method to creat an event in the selected calendar. Must select a calendar or create one before calling this method.
+ */
+-(void)createEvent:(NSString *)eventTitle
+		  location:(NSString *)location
+		 startTime:(NSDate *)startDate
+		   endTime:(NSDate *)endDate
+	   description:(NSString *)description
+			   URL:(NSString *)urlString
+ completionHanlder:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     createEvent: completionHandler:
+ @discussion Call this method to create an event from an EKEvent object.
+ */
+-(void)createEvent:(EKEvent *)event
+ completionHandler:(eventsOperationCompletionHandler)handler;
+```
+Typical use
+```objective-C
+[manager createEvent:eventName location:eventLocation startTime:start endTime:end description:description URL:url completionHandler:(BOOL success, NSError *error, NSString *eventIdentifier){
+	if (success){
+		NSLog(@"%@",eventIdentifier);
+		//save the identifier or other stuff...
+	}
+	else{
+		//error handling
+	}
+}];
+```
+
+### Updating events
+#### Generic method
+You can call the method below to update an event. You **must** have the `eventIdentifier` by your hand to update an event.
+```objective-C
+/*!
+ @method     updateEvent: withTitle: location: startTime: endTime: description: URL: completionHandler:
+ @discussion Call this method to retrieve and update an event.
+ */
+-(void)updateEvent:(NSString *)eventIdentifier
+		 withTitle:(NSString *)title
+		  location:(NSString *)location
+		 startTime:(NSDate *)start
+		   endTime:(NSDate *)end
+	   description:(NSString *)descrition
+			   URL:(NSString *)urlString
+ completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     updateEvent: withEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event using an EKEvent object.
+ */
+-(void)updateEvent:(NSString *)eventIdentifier
+		 withEvent:(EKEvent *)event
+ completionHandler:(eventsOperationCompletionHandler)handler;
+``` 
+
+#### Updating single parameters
+The class provides a few methods that only update single field (property) of an event for quick use.
+``` objective-C
+/*!
+ @method     updateEventTitle: forEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event's title.
+ */
+-(void)updateEventTitle:(NSString *)title
+			   forEvent:(NSString *)eventIdentifier
+	  completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     updateEventLocation: forEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event's location.
+ */
+-(void)updateEventLocation:(NSString *)location
+			   forEvent:(NSString *)eventIdentifier
+	  completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     updateEventDescription: forEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event's description.
+ */
+-(void)updateEventDescription:(NSString *)description
+			   forEvent:(NSString *)eventIdentifier
+	  completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     updateEventStartTime: forEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event's start time.
+ */
+-(void)updateEventStartTime:(NSDate *)startTime
+			   forEvent:(NSString *)eventIdentifier
+	  completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     updateEventEndTime: forEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event's end time.
+ */
+-(void)updateEventEndTime:(NSDate *)endTime
+			   forEvent:(NSString *)eventIdentifier
+	  completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     updateEventURL: forEvent: completionHandler:
+ @discussion Call this method to retrieve and update the event's URL.
+ */
+-(void)updateEventURL:(NSString *)urlString
+			   forEvent:(NSString *)eventIdentifier
+	  completionHandler:(eventsOperationCompletionHandler)handler;
+```
 
 ## TODO:
 1. More documentation.
