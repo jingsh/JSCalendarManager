@@ -126,11 +126,11 @@ If possible, we recommend creating your own calendar. Therefore, the user's othe
 
 If you don't know the calendar identifier, don't worry, you can pull a list of calendars available on the device, and pick one or let user pick one.
 ```obejective-C
-NSArray *calendars = [manager allCalendars];
-for (EKCalendar *cal in calendars){
-  NSLog(@"%@",cal.calendarIdentifier);
-  //do something here.
-}
+	NSArray *calendars = [manager allCalendars];
+	for(EKCalendar *cal in calendars){
+  		NSLog(@"%@",cal.calendarIdentifier);
+  		//do something here.
+	}
 ```  
 
 ## TODO:
