@@ -8,6 +8,16 @@
 
 #import "JSCalendarManager.h"
 
+typedef enum:NSInteger{
+	updateTitle = 1,
+	updateLocation,
+	updateStartDate,
+	updateEndDate,
+	updateNotes,
+	updateURL
+}updateOptions;
+
+
 @interface JSCalendarManager ()
 @property(nonatomic,strong)EKEventStore *eventStore;
 @property(nonatomic,strong)EKCalendar *calendar;
@@ -83,17 +93,12 @@
 	return NO;
 }
 
--(NSArray *)nonBirthDayCalendars
+-(NSArray *)allCalendars
 {
-	NSMutableArray *calendars = [NSMutableArray array];
 	if ([JSCalendarManager calendarAccessGranted]) {
-		for (EKCalendar *calendar in [self.eventStore calendarsForEntityType:EKEntityTypeEvent]) {
-			if (calendar.type != EKCalendarTypeBirthday) {
-				[calendars addObject:calendar];
-			}
-		}
+		return [self.eventStore calendarsForEntityType:EKEntityTypeEvent];
 	}
-	return calendars;
+	return nil;
 }
 
 -(NSArray *)iCloudCalendars
@@ -110,12 +115,12 @@
 }
 
 #pragma mark - Calendar operation
--(void)setDefaultCalendar:(NSString *)calendarIdentifier
+-(void)setUsingCalendar:(NSString *)calendarIdentifier
 {
 	if (calendarIdentifier) {
-		EKCalendar *calendar_ = [self.eventStore calendarWithIdentifier:calendarIdentifier];
-		if (calendar_) {
-			self.calendar = calendar_;
+		EKCalendar *cal = [self.eventStore calendarWithIdentifier:calendarIdentifier];
+		if (cal) {
+			self.calendar = cal;
 		}
 		else{
 			self.calendar = [self.eventStore defaultCalendarForNewEvents];
@@ -153,18 +158,23 @@
 		return;
 	}
 	
-	EKCalendar *calendar_ = [EKCalendar calendarForEntityType:EKEntityTypeEvent eventStore:self.eventStore];
-	calendar_.source = calendarSource;
-	calendar_.title = calendarTitle;
+	EKCalendar *cal = [EKCalendar calendarForEntityType:EKEntityTypeEvent eventStore:self.eventStore];
+	cal.source = calendarSource;
+	cal.title = calendarTitle;
 	
 	NSError *error = nil;
-	BOOL success = [self.eventStore saveCalendar:calendar_ commit:YES error:&error];
+	BOOL success = [self.eventStore saveCalendar:cal commit:YES error:&error];
 	if (success) {
-		self.calendar = calendar_;
-		handler (success,error,calendar_.calendarIdentifier);
+		self.calendar = cal;
+		handler (success,error,cal.calendarIdentifier);
 	}else{
 		handler(success,error,nil);
 	}
+}
+
+-(void)createLocalCalendar:(NSString *)calendarTitle completionHandler:(calendarOperationCompletionHandler)handler
+{
+	[self createCalendar:calendarTitle iCloud:NO completionHandler:handler];
 }
 
 -(void)deleteCalendar:(NSString *)calendarIdentifier completionHandler:(calendarOperationCompletionHandler)handler
@@ -179,6 +189,177 @@
 		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
 		handler(NO,error,calendarIdentifier);
 	}
+}
+
+#pragma mark - Event operations
+-(void)createEvent:(NSString *)eventTitle location:(NSString *)location startTime:(NSDate *)startDate endTime:(NSDate *)endDate description:(NSString *)description URL:(NSString *)urlString completionHanlder:(eventsOperationCompletionHandler)handler
+{
+	NSError *error = nil;
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	EKEvent *event = [EKEvent eventWithEventStore:self.eventStore];
+	
+	event.calendar = self.calendar;
+	
+	event.title = eventTitle;
+	event.location = location;
+	event.startDate = startDate;
+	event.endDate = endDate;
+	event.notes = description;
+	event.URL = [NSURL URLWithString:urlString];
+	
+	BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+	handler(success,error,event.eventIdentifier);
+}
+
+-(void)createEvent:(EKEvent *)event completionHandler:(eventsOperationCompletionHandler)handler
+{
+	NSError *error = nil;
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	event.calendar = self.calendar;
+	BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+	handler(success,error,event.eventIdentifier);
+}
+
+-(void)updateEvent:(NSString *)eventIdentifier withTitle:(NSString *)title location:(NSString *)location startTime:(NSDate *)start endTime:(NSDate *)end description:(NSString *)descrition URL:(NSString *)urlString completionHandler:(eventsOperationCompletionHandler)handler
+{
+	NSError *error = nil;
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
+	if (!event) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:nil];
+		handler(NO,error,eventIdentifier);
+		return;
+	}
+	event.title = title;
+	event.location = location;
+	event.startDate = start;
+	event.endDate = end;
+	event.notes = descrition;
+	event.URL = [NSURL URLWithString:urlString];
+	
+	BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+	handler(success,error,event.eventIdentifier);
+}
+
+-(void)updateEvent:(NSString *)eventIdentifier withEvent:(EKEvent *)event completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEvent:eventIdentifier
+			withTitle:event.title
+			 location:event.location
+			startTime:event.startDate
+			  endTime:event.endDate
+		  description:event.description
+				  URL:[event.URL absoluteString]
+	completionHandler:handler];
+}
+
+-(void)updateEventWithOption:(updateOptions)option value:(id)value forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	NSError *error = nil;
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
+	if (!event) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:nil];
+		handler(NO,error,eventIdentifier);
+		return;
+	}
+	
+	switch (option) {
+		case updateTitle:
+			event.title = (NSString *)value;
+			break;
+		case updateLocation:
+			event.location = (NSString *)value;
+			break;
+		case updateStartDate:
+			event.startDate = (NSDate *)value;
+			break;
+		case updateEndDate:
+			event.endDate = (NSDate *)value;
+			break;
+		case updateNotes:
+			event.notes = (NSString *)value;
+			break;
+		case updateURL:
+			event.URL = [NSURL URLWithString:value];
+			break;
+	default:
+			break;
+	}
+	
+	BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+	handler(success,error,event.eventIdentifier);
+}
+
+
+-(void)updateEventTitle:(NSString *)title forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEventWithOption:updateTitle value:title forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)updateEventLocation:(NSString *)location forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEventWithOption:updateLocation value:location forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)updateEventStartTime:(NSDate *)startTime forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEventWithOption:updateStartDate value:startTime forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)updateEventEndTime:(NSDate *)endTime forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEventWithOption:updateEndDate value:endTime forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)updateEventDescription:(NSString *)description forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEventWithOption:updateNotes value:description forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)updateEventURL:(NSString *)urlString forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self updateEventWithOption:updateURL value:urlString forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)deleteEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	NSError *error = nil;
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
+	if (!event) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:nil];
+		handler(NO,error,eventIdentifier);
+		return;
+	}
+	
+	BOOL success = [self.eventStore removeEvent:event span:EKSpanThisEvent commit:YES error:&error];
+	handler(success,error,eventIdentifier);
 }
 
 
