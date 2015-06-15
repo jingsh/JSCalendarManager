@@ -91,7 +91,7 @@
 
 -(void)promptForCalendarNameWithCompletionHandler:(calendarOperationCompletionHandler)handler
 {
-	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Create UCS Calendar" message:@"Please enter the name of the calendar you want to sync to. Press cancel button to sync to existing calendars." preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Create a Calendar" message:@"Please enter the name of the calendar you want to create." preferredStyle:UIAlertControllerStyleAlert];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *nameField){
 		nameField.placeholder = @"Calendar name";
 		[nameField addTarget:self action:@selector(calendarNameFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
