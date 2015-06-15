@@ -1,5 +1,8 @@
 # JSCalendarManager
-An Objective-C class for common calendar and events operations. Requires EventKit.framework.
+An Objective-C class for common calendar and events operations. Requires `EventKit.framework`.
+```objective-C
+#import <EventKit/EventKit.h>
+```
 
 ## How to install?
 Drag and drop `JSCalendarManager.h` and `JSCalendarManager.m` file into your project. 
@@ -72,13 +75,13 @@ If you saved the calendar identifier before, you can set the calendar you want t
 [manager setUsingCalendar:KNOWN_CALENDAR_IDENTIFIER];
 ```
 You must set the calendar you wish to use, otherwise the default calendar in your app will be used. 
-If possible, we recommend creat your own calendar, therefore, the user's other calendar will not be interfered, incase user accidentally deleted calendars/events they don't want to.
+If possible, we recommend creating your own calendar. Therefore, the user's other calendar will not be left alone, incase user accidentally deletes/messes their calendars/events.
 
 If you don't know the calendar identifier, don't worry, you can pull a list of calendars available on the device, and pick one or let user pick one.
 ```obejective-C
-  NSArray *calendars = [manager allCalendars];
-  for (EKCalendar *cal in calendars){
-    NSLog(@"%@",cal.calendarIdentifier);
-    //do something here.
-  }
+NSArray *calendars = [manager allCalendars];
+for (EKCalendar *cal in calendars){
+  NSLog(@"%@",cal.calendarIdentifier);
+  //do something here.
+}
 ```  
