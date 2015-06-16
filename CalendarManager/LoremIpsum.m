@@ -21,7 +21,7 @@ typedef NSImage LIImage;
 typedef NSSize LISize;
 #endif
 
-NSUInteger const LINumberOfLastYears = 4;
+NSUInteger const LINumberOfLastYears = 1;
 NSUInteger const LIMinNumberOfWordsInSentence = 4;
 NSUInteger const LIMaxNumberOfWordsInSentence = 16;
 NSUInteger const LIMinNumberOfSentencesInParagraph = 3;

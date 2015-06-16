@@ -22,6 +22,15 @@
 	// Do any additional setup after loading the view, typically from a nib.
 	self.events = [NSMutableArray array];
 	self.calendarManager = [[JSCalendarManager alloc]init];
+	
+	[self.calendarManager requestCalendarAccessWithCompletionHandler:^(BOOL granted, NSError *error){
+		if (granted) {
+			NSLog(@"Calendar access granted");
+		}
+		else{
+			NSLog(@"%@",error);
+		}
+	}];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -56,18 +65,17 @@
 #pragma mark 
 -(IBAction)addCalendar:(id)sender
 {
-	[self.calendarManager requestCalendarAccessWithCompletionHandler:^(BOOL granted, NSError *error){
-		if (granted) {
-			[self promptForCalendarNameWithCompletionHandler:^(BOOL success, NSError *error, NSString *calendarIdentifier){
-				if (success) {
-					NSLog(@"Calendar: %@ is created.",calendarIdentifier);
-				}
-				if (error) {
-					NSLog(@"Error: %@",error);
-				}
-			}];
-		}
-	}];
+	if ([JSCalendarManager calendarAccessGranted]) {
+		[self promptForCalendarNameWithCompletionHandler:^(BOOL success,NSError *error, NSString *calendarIdentifier){
+			if (success) {
+				NSLog(@"Calendar: %@ is created.",calendarIdentifier);
+				[self.calendarManager setUsingCalendar:calendarIdentifier];
+			}
+			if (error) {
+				NSLog(@"Error: %@",error);
+			}
+		}];
+	}
 }
 
 -(IBAction)addRandomEvents:(id)sender
@@ -82,7 +90,7 @@
 	[self.calendarManager createEvent:title location:location startTime:start endTime:end description:notes URL:url completionHanlder:^(BOOL success, NSError *error, NSString *eventIdentifier){
 		if (success) {
 			NSDictionary *dict = @{@"title":title,@"id":eventIdentifier};
-			NSLog(@"Event: %@ is created.",eventIdentifier);
+			NSLog(@"Event: %@ is created. Title: %@\n Location: %@\n Start: %@",eventIdentifier,title,location,start);
 			[self.events addObject:dict];
 			[self.tableView reloadData];
 		}

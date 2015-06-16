@@ -28,26 +28,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="mm3-5P-FkE">
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="mm3-5P-FkE" id="lKW-nW-Bec">
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="OtY-qX-Dst" id="aoo-6E-jWh"/>
                             <outlet property="delegate" destination="OtY-qX-Dst" id="NxT-CC-LOW"/>
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" id="OGw-af-msz">
-                        <barButtonItem key="leftBarButtonItem" systemItem="compose" id="aB8-Kf-6rT">
+                        <barButtonItem key="leftBarButtonItem" title="Create Calendar" id="aB8-Kf-6rT">
                             <connections>
                                 <action selector="addCalendar:" destination="OtY-qX-Dst" id="qjn-GJ-Mcm"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="Wus-LG-JLG">
+                        <barButtonItem key="rightBarButtonItem" title="Create Event" id="Wus-LG-JLG">
                             <connections>
                                 <action selector="addRandomEvents:" destination="OtY-qX-Dst" id="MUO-XK-agc"/>
                             </connections>
