@@ -62,7 +62,30 @@
 	return cell;
 }
 
-#pragma mark 
+-(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	return YES;
+}
+
+-(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	if (editingStyle == UITableViewCellEditingStyleDelete) {
+		NSDictionary *eventDict = [self.events objectAtIndex:indexPath.row];
+		NSString *eventIdentifier = [eventDict objectForKey:@"id"];
+		[self.calendarManager deleteEvent:eventIdentifier completionHandler:^(BOOL success, NSError *error, NSString *eventIdentifier){
+			if (success) {
+				NSLog(@"Successfully deleted event: %@",eventIdentifier);
+				[self.events removeObject:eventDict];
+				[self.tableView reloadData];
+			}
+			else{
+				NSLog(@"Error: %@",error);
+			}
+		}];
+	}
+}
+
+#pragma mark - Create calendar and event
 -(IBAction)addCalendar:(id)sender
 {
 	if ([JSCalendarManager calendarAccessGranted]) {
