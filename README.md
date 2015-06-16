@@ -180,6 +180,27 @@ Typical use
 	}
 }];
 ```
+### Retrieving event
+You can retrieve an event from the calendar database on your phone using the event identifier. The `JSCalendarManager` provides a method to easily do so.
+```objective-C
+/*!
+ @method     retrieveEvent: completionHandler:
+ @discussion Call this method to retrieve an event using its event identifier
+ */
+-(void)retrieveEvent:(NSString *)eventIdentifier completionHandler:(void(^)(NSError *error, EKEvent *event))completion;
+```
+You can retrieve an event like this:
+```objective-C
+[manager retrieveEvent:eventIdentifier completionHanlder:(NSError *error, EKEvent *event){
+	if(error){
+		NSLog(@"%@",error);
+		//error handling here...
+	}else{
+		NSLog(@"Event retrieved: %@",event);
+		//do something with the retrieved event.
+	}
+}];
+```
 
 ### Updating events
 #### Generic method
@@ -259,10 +280,128 @@ The class provides a few methods that only update single field (property) of an 
 	  completionHandler:(eventsOperationCompletionHandler)handler;
 ```
 
+### Deleting an event
+The class provide a method to delete an event using its event identifier.
+```objective-C
+/*!
+ @method     deleteEvent: completionHandler:
+ @discussion Call this method to delete an event from database.
+ */
+-(void)deleteEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler;
+```
+Example:
+```objective-C
+[manager deleteEvent:eventIdentifier completionHanlder:(BOOL success, NSError *error, NSString *eventIdentifier){
+	if(success){
+		NSLog(@"Successfully deleted event: %@",eventIdentifier);
+		//do something here, such as reload your view.
+	}else{
+		NSLog(@"%@",error);
+		//error handling here...
+	}
+}];
+```
+### Search events
+You can search event(s) using the event identifiers or in a time range in the calendar database. The class provides two methods for this task.
+#### Search single event using its identifier
+You can use the method to search a give event with its identifier. The method is searching **all** calendars on the device.
+```objective-C
+/*!
+ @method     isEvent: inCalendarWithSearchHandler:
+ @discussion Call this method to determine whether an event is in the database.
+ */
+-(void)isEvent:(NSString *)eventIdentifier inCalendarWithSearchHandler:(eventSearchHandler)handler;
+```
+Example:
+```objective-C
+[manager isEvent:eventIdentifier inCalendarWithSearchHandler:(BOOL found, NSError *error, NSArray *events){
+	if(found){
+		NSLog(@"Found event %@",eventIdentifier);
+		EKEvent *event = [events firstObject];
+		//do something here...
+	}else{
+		NSLog(@"%@",error);
+		//error handling here...
+	}
+}];
+```
+
+#### Search events in a given time range
+The class provides a method to search events in a given time range. You need to specify the calendars (`NSArray* calendars`) to search in. Passing in `nil` to search all calendars.
+
+
+## Alarm operations
+You can using the class to add, retieve, or delete an alarm to an event. 
+
+### Adding alarms
+There are two methods to add alarm. The first one is adding an alarm "XX minutes **before**" the start time of an event. Passing in a negative value to add alarm "XX minutes **after**" the event.
+```objective-C
+/*!
+ @method     addAlarm: forEvent: completionHandler:
+ @discussion Call this method to add an alarm at given minutes *before* the event. Negative minutes value set the alarm after the event.
+ */
+-(void)addAlarm:(NSInteger)minutes
+	   forEvent:(NSString *)eventIdentifier
+completionHanlder:(eventsOperationCompletionHandler)handler;
+```
+The second method is adding an alarm at a specific time and date.
+```objective-C
+/*!
+ @method     addAlarmAt: forEvent: completionHandler:
+ @discussion Call this method to add an alarm at given time and date for an event.
+ */
+-(void)addAlarmAt:(NSDate *)date forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler;
+```
+Example:
+```objective-C
+[manager addAlarmAt:alarmTime forEvent:eventIdentifier completionHandler:(BOOL success, NSError *error, NSString *eventIdentifier){
+	if(success){
+		NSLog(@"Successfully added an alarm %@",eventIdentifier);
+		//other code here.
+	}else{
+		NSLog(@"%@",error);
+		//error handling...
+	}
+}];
+```
+### Retrieving alarms
+The `JSCalendarManager` class provides a method to retrieve a list of alarms for an given event. Returns `nil` if no alarm found.
+```objective-C
+/*!
+ @method     alarmsForEvent:
+ @discussion Returns a list of alarms for a given event. Returns nil if the event doesn't exists or have no alarms.
+ */
+-(NSArray *)alarmsForEvent:(NSString *)eventIdentifier;
+```
+### Removing an alarm
+The class provides a method to remove an alarm (type of `EKAlarm`). If no alarm is assoiciated with the event, the completion block returns a `NO` flag for success, and a `NSError` object notifying you that there is no alarm for this event.
+```objective-C
+/*!
+ @method     removeAlarm: forEvent: completionHanlder:
+ @discussion Call this method to remove an alarm on the given event.
+ */
+-(void)removeAlarm:(EKAlarm *)alarm forEvent:(NSString *)eventIdentifier completionHanlder:(eventsOperationCompletionHandler)handler;
+```
+Example:
+```objective-C
+[manager removeAlarm:alarmToRemove forEvent:eventIdentifier completionHandler:(BOOL success, NSError *error, NSString *eventIdentifier){
+	if(success){
+		NSLog(@"Successfully removed alarm for event: %@",eventIdentifier);
+		//some codes here...
+	}else{
+		NSLog(@"%@",error);
+		if(error.code == kErrorAlarmDoesNotExist){
+			//No alarm associated with the event, some code here...
+		}else{
+			//other error handling here...
+		}
+	}
+}];
+```
+
 ## TODO:
-1. More documentation.
-2. Add support for reminders.
-3. Swift version.
+1. Add support for reminders.
+2. Swift version.
 
 ## License
 The MIT License (MIT)
