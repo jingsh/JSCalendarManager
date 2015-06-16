@@ -213,4 +213,24 @@ typedef void (^eventSearchHandler)(BOOL found, NSError *error, NSArray *eventsAr
  */
 -(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler;
 
+/*!
+ @method     addAlarm: forEvent: completionHandler:
+ @discussion Call this method to add an alarm at given minutes *before* the event. Negative minutes value set the alarm after the event.
+ */
+-(void)addAlarm:(NSInteger)minutes
+	   forEvent:(NSString *)eventIdentifier
+completionHanlder:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     addAlarmAt: forEvent: completionHandler:
+ @discussion Call this method to add an alarm at given time and date for an event.
+ */
+-(void)addAlarmAt:(NSDate *)date forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler;
+
+/*!
+ @method     alarmsForEvent:
+ @discussion Returns a list of alarms for a given event. Returns nil if the event doesn't exists or have no alarms.
+ */
+-(NSArray *)alarmsForEvent:(NSString *)eventIdentifier;
+
 @end

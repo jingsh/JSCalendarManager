@@ -14,8 +14,56 @@ typedef enum:NSInteger{
 	updateStartDate,
 	updateEndDate,
 	updateNotes,
-	updateURL
+	updateURL,
 }updateOptions;
+
+@interface Helper : NSObject
++(NSDictionary *)errorInfoWithCode:(JSCalendarManagerErrorCode)errCode;
+@end
+
+@implementation Helper
+
++(NSDictionary *)errorInfoWithCode:(JSCalendarManagerErrorCode)errCode
+{
+	NSString *description;
+	NSString *recoverySuggestion;
+	switch (errCode) {
+		case kErrorCalendarAccessNotGranted:{
+			description = @"Calendar access was denied or restricted by user.";
+			recoverySuggestion = @"Ask user to grant permissions explictly in the privacy section in the setting app.";
+		}
+		break;
+		case kErrorCalendarDoesNotExist:{
+			description = @"Calendar to write/read event is not set.";
+			recoverySuggestion = @"Call -(void)setUsingCalendar: method to set the calendar to use.";
+		}
+			break;
+		case kErrorCalendarSourceNotAvailable:{
+			description = @"Calendar source not available.";
+			recoverySuggestion = @"Can't retrieve the requested calendar source in the eventStore calendar sources. Try using other calendar source.";
+		}
+			break;
+		case kErrorICloudCalendarNotAvailable:{
+			description =@"User does not have iCloud calendars in the calendar database.";
+			recoverySuggestion = @"Try creating/using local calendars.";
+		}
+			break;
+		case kErrorEventDoesNotExist:{
+			description = @"The requested event does not exist.";
+			recoverySuggestion = @"";
+		}
+			break;
+  default:
+			break;
+	}
+	NSDictionary *userInfo = @{
+							   NSLocalizedDescriptionKey:NSLocalizedString(description, nil),
+							   NSLocalizedRecoveryOptionsErrorKey:NSLocalizedString(recoverySuggestion, nil)
+							   };
+	return userInfo;
+}
+
+@end
 
 
 @interface JSCalendarManager ()
@@ -78,7 +126,7 @@ typedef enum:NSInteger{
 		handler(YES,nil);
 	}
 	if ([JSCalendarManager shouldGrantAccessManually]) {
-		NSError *error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:nil];
+		NSError *error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:[Helper errorInfoWithCode:kErrorCalendarAccessNotGranted]];
 		handler(NO,error);
 	}
 }
@@ -133,7 +181,7 @@ typedef enum:NSInteger{
 -(void)createCalendar:(NSString *)calendarTitle iCloud:(BOOL)icloud completionHandler:(calendarOperationCompletionHandler)handler
 {
 	if (icloud && ![self isICloudCalendarAvailable]) {
-		NSError *error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorICloudCalendarNotAvailable userInfo:nil];
+		NSError *error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorICloudCalendarNotAvailable userInfo:[Helper errorInfoWithCode:kErrorICloudCalendarNotAvailable]];
 		handler(NO,error,nil);
 		return;
 	}
@@ -155,7 +203,7 @@ typedef enum:NSInteger{
 	}
 	
 	if (!calendarSource) {
-		NSError *error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarSourceNotAvailable userInfo:nil];
+		NSError *error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarSourceNotAvailable userInfo:[Helper errorInfoWithCode:kErrorCalendarSourceNotAvailable]];
 		handler(NO,error,nil);
 		return;
 	}
@@ -188,7 +236,7 @@ typedef enum:NSInteger{
 		BOOL success = [self.eventStore removeCalendar:calendar commit:YES error:&error];
 		handler(success,error,calendarIdentifier);
 	}else{
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,calendarIdentifier);
 	}
 }
@@ -198,7 +246,7 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,nil);
 		return;
 	}
@@ -222,7 +270,7 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,nil);
 		return;
 	}
@@ -236,14 +284,14 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,nil);
 		return;
 	}
 	
 	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
 	if (!event) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
 		handler(NO,error,eventIdentifier);
 		return;
 	}
@@ -274,14 +322,14 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,nil);
 		return;
 	}
 	
 	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
 	if (!event) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
 		handler(NO,error,eventIdentifier);
 		return;
 	}
@@ -348,14 +396,14 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,nil);
 		return;
 	}
 	
 	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
 	if (!event) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
 		handler(NO,error,eventIdentifier);
 		return;
 	}
@@ -369,7 +417,7 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (![JSCalendarManager calendarAccessGranted]) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:[Helper errorInfoWithCode:kErrorCalendarAccessNotGranted]];
 		handler(NO,error,nil);
 		return;
 	}
@@ -386,13 +434,13 @@ typedef enum:NSInteger{
 {
 	NSError *error = nil;
 	if (![JSCalendarManager calendarAccessGranted]) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:[Helper errorInfoWithCode:kErrorCalendarAccessNotGranted]];
 		handler(NO,error,nil);
 		return;
 	}
 	
 	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:nil];
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		handler(NO,error,nil);
 		return;
 	}
@@ -407,5 +455,43 @@ typedef enum:NSInteger{
 		handler(NO,error,events);
 	}
 }
+
+#pragma mark - Alarm operations
+-(void)addAlarm:(NSInteger)minutes forEvent:(NSString *)eventIdentifier completionHanlder:(eventsOperationCompletionHandler)handler
+{
+	NSDate *alarmDate = [NSDate dateWithTimeIntervalSinceNow:-minutes*60];
+	[self addAlarmAt:alarmDate forEvent:eventIdentifier completionHandler:handler];
+}
+
+-(void)addAlarmAt:(NSDate *)date forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
+{
+	NSError *error = nil;
+	if (!self.calendar) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
+		handler(NO,error,nil);
+		return;
+	}
+	
+	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
+	if (!event) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
+		handler(NO,error,eventIdentifier);
+		return;
+	}
+	
+	EKAlarm *alarm = [EKAlarm alarmWithAbsoluteDate:date];
+	[event addAlarm:alarm];
+	handler (YES,error,eventIdentifier);
+}
+
+-(NSArray *)alarmsForEvent:(NSString *)eventIdentifier
+{
+	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
+	if (event) {
+		return event.alarms;
+	}
+	else return nil;
+}
+
 
 @end
