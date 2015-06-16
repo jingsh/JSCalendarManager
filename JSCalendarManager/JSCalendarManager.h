@@ -128,6 +128,12 @@ typedef void (^eventSearchHandler)(BOOL found, NSError *error, NSArray *eventsAr
  completionHandler:(eventsOperationCompletionHandler)handler;
 
 /*!
+ @method     retrieveEvent: completionHandler:
+ @discussion Call this method to retrieve an event using its event identifier
+ */
+-(void)retrieveEvent:(NSString *)eventIdentifier completionHandler:(void(^)(NSError *error, EKEvent *event))completion;
+
+/*!
  @method     updateEvent: withTitle: location: startTime: endTime: description: URL: completionHandler:
  @discussion Call this method to retrieve and update an event.
  */

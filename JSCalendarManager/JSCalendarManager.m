@@ -288,6 +288,11 @@ typedef enum:NSInteger{
 -(void)retrieveEvent:(NSString *)eventIdentifier completionHandler:(void(^)(NSError *error, EKEvent *event))completion
 {
 	NSError *error = nil;
+	if (![JSCalendarManager calendarAccessGranted]) {
+		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:[Helper errorInfoWithCode:kErrorCalendarAccessNotGranted]];
+		completion(error,nil);
+		return;
+	}
 	if (!self.calendar) {
 		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
 		completion(error,nil);
