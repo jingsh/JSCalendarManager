@@ -414,6 +414,8 @@ Example:
 	}
 }];
 ```
+## Example:
+A simple example to use this class in provided in the `CalendarManager.xcodeproj`.
 
 ## TODO:
 1. Add support for reminders.
