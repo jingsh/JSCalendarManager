@@ -431,7 +431,7 @@ typedef enum:NSInteger{
 	}];
 }
 
--(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end inCalendars:(NSArray *)calendars withSearchHandler:(eventSearchHandler)handler
 {
 	NSError *error = nil;
 	if (![JSCalendarManager calendarAccessGranted]) {
@@ -446,7 +446,7 @@ typedef enum:NSInteger{
 		return;
 	}
 	
-	NSPredicate *searchPredicate = [self.eventStore predicateForEventsWithStartDate:start endDate:end calendars:@[self.calendar]];
+	NSPredicate *searchPredicate = [self.eventStore predicateForEventsWithStartDate:start endDate:end calendars:calendars];
 	
 	NSArray *events = [self.eventStore eventsMatchingPredicate:searchPredicate];
 	
@@ -457,11 +457,24 @@ typedef enum:NSInteger{
 	}
 }
 
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler
+{
+	[self findEventsBetween:start and:end inCalendars:@[self.calendar] withSearchHandler:handler];
+}
+
 #pragma mark - Alarm operations
 -(void)addAlarm:(NSInteger)minutes forEvent:(NSString *)eventIdentifier completionHanlder:(eventsOperationCompletionHandler)handler
 {
-	NSDate *alarmDate = [NSDate dateWithTimeIntervalSinceNow:-minutes*60];
-	[self addAlarmAt:alarmDate forEvent:eventIdentifier completionHandler:handler];
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error,EKEvent *event){
+		if (error) {
+			handler(NO,error,eventIdentifier);
+		}
+		else{
+			EKAlarm *alarm = [EKAlarm alarmWithRelativeOffset:-minutes*60];
+			[event addAlarm:alarm];
+			handler (YES,error,eventIdentifier);
+		}
+	}];
 }
 
 -(void)addAlarmAt:(NSDate *)date forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler

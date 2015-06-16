@@ -215,8 +215,14 @@ typedef void (^eventSearchHandler)(BOOL found, NSError *error, NSArray *eventsAr
 -(void)isEvent:(NSString *)eventIdentifier inCalendarWithSearchHandler:(eventSearchHandler)handler;
 
 /*!
+ @method     findEventsBetween: and: inCalendars: withSearchHandler:
+ @discussion Call this method to find all events in the specified date range in the specified calendars. This method allows to search other calendar, meaning you can change events in user's other calendar. So use with caution. If you just want to search the events in the calendar your app is using, use the methode below.
+ */
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end inCalendars:(NSArray *)calendars withSearchHandler:(eventSearchHandler)handler;
+
+/*!
  @method     findEventsBetween: and: withSearchHandler:
- @discussion Call this method to find all events in the specified date range.
+ @discussion Call this method to find all events in the specified date range in the calendar that currently is being used.
  */
 -(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler;
 
