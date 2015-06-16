@@ -17,6 +17,7 @@ typedef enum:NSInteger{
 	kErrorCalendarSourceNotAvailable,
 	kErrorCalendarDoesNotExist,
 	kErrorEventDoesNotExist,
+	kErrorAlarmDoesNotExist,
 }JSCalendarManagerErrorCode;
 
 typedef void (^calendarOperationCompletionHandler)(BOOL success, NSError *error, NSString *calendarIdentifier);
@@ -232,5 +233,11 @@ completionHanlder:(eventsOperationCompletionHandler)handler;
  @discussion Returns a list of alarms for a given event. Returns nil if the event doesn't exists or have no alarms.
  */
 -(NSArray *)alarmsForEvent:(NSString *)eventIdentifier;
+
+/*!
+ @method     removeAlarm: forEvent: completionHanlder:
+ @discussion Call this method to remove an alarm on the given event.
+ */
+-(void)removeAlarm:(EKAlarm *)alarm forEvent:(NSString *)eventIdentifier completionHanlder:(eventsOperationCompletionHandler)handler;
 
 @end

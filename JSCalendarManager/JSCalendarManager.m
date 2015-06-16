@@ -53,6 +53,11 @@ typedef enum:NSInteger{
 			recoverySuggestion = @"";
 		}
 			break;
+		case kErrorAlarmDoesNotExist:{
+			description = @"The event does not has an alarm";
+			recoverySuggestion = @"";
+		}
+			break;
   default:
 			break;
 	}
@@ -280,30 +285,41 @@ typedef enum:NSInteger{
 	handler(success,error,event.eventIdentifier);
 }
 
--(void)updateEvent:(NSString *)eventIdentifier withTitle:(NSString *)title location:(NSString *)location startTime:(NSDate *)start endTime:(NSDate *)end description:(NSString *)descrition URL:(NSString *)urlString completionHandler:(eventsOperationCompletionHandler)handler
+-(void)retrieveEvent:(NSString *)eventIdentifier completionHandler:(void(^)(NSError *error, EKEvent *event))completion
 {
 	NSError *error = nil;
 	if (!self.calendar) {
 		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
-		handler(NO,error,nil);
+		completion(error,nil);
 		return;
 	}
-	
 	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
 	if (!event) {
 		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
-		handler(NO,error,eventIdentifier);
+		completion(error,nil);
 		return;
 	}
-	event.title = title;
-	event.location = location;
-	event.startDate = start;
-	event.endDate = end;
-	event.notes = descrition;
-	event.URL = [NSURL URLWithString:urlString];
-	
-	BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
-	handler(success,error,event.eventIdentifier);
+	completion(error,event);
+}
+
+-(void)updateEvent:(NSString *)eventIdentifier withTitle:(NSString *)title location:(NSString *)location startTime:(NSDate *)start endTime:(NSDate *)end description:(NSString *)descrition URL:(NSString *)urlString completionHandler:(eventsOperationCompletionHandler)handler
+{
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error, EKEvent *event){
+		if (error) {
+			handler(NO,error,eventIdentifier);
+		}
+		else{
+			event.title = title;
+			event.location = location;
+			event.startDate = start;
+			event.endDate = end;
+			event.notes = descrition;
+			event.URL = [NSURL URLWithString:urlString];
+			
+			BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+			handler(success,error,event.eventIdentifier);
+		}
+	}];
 }
 
 -(void)updateEvent:(NSString *)eventIdentifier withEvent:(EKEvent *)event completionHandler:(eventsOperationCompletionHandler)handler
@@ -320,45 +336,37 @@ typedef enum:NSInteger{
 
 -(void)updateEventWithOption:(updateOptions)option value:(id)value forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
 {
-	NSError *error = nil;
-	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
-		handler(NO,error,nil);
-		return;
-	}
-	
-	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
-	if (!event) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
-		handler(NO,error,eventIdentifier);
-		return;
-	}
-	
-	switch (option) {
-		case updateTitle:
-			event.title = (NSString *)value;
-			break;
-		case updateLocation:
-			event.location = (NSString *)value;
-			break;
-		case updateStartDate:
-			event.startDate = (NSDate *)value;
-			break;
-		case updateEndDate:
-			event.endDate = (NSDate *)value;
-			break;
-		case updateNotes:
-			event.notes = (NSString *)value;
-			break;
-		case updateURL:
-			event.URL = [NSURL URLWithString:value];
-			break;
-	default:
-			break;
-	}
-	
-	BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
-	handler(success,error,event.eventIdentifier);
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error, EKEvent *event){
+		if (error) {
+			handler(NO,error,eventIdentifier);
+		}
+		else{
+			switch (option) {
+				case updateTitle:
+					event.title = (NSString *)value;
+					break;
+				case updateLocation:
+					event.location = (NSString *)value;
+					break;
+				case updateStartDate:
+					event.startDate = (NSDate *)value;
+					break;
+				case updateEndDate:
+					event.endDate = (NSDate *)value;
+					break;
+				case updateNotes:
+					event.notes = (NSString *)value;
+					break;
+				case updateURL:
+					event.URL = [NSURL URLWithString:value];
+					break;
+				default:
+					break;
+			}
+			BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+			handler(success,error,event.eventIdentifier);
+		}
+	}];
 }
 
 
@@ -394,40 +402,28 @@ typedef enum:NSInteger{
 
 -(void)deleteEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
 {
-	NSError *error = nil;
-	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
-		handler(NO,error,nil);
-		return;
-	}
-	
-	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
-	if (!event) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
-		handler(NO,error,eventIdentifier);
-		return;
-	}
-	
-	BOOL success = [self.eventStore removeEvent:event span:EKSpanThisEvent commit:YES error:&error];
-	handler(success,error,eventIdentifier);
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error, EKEvent *event){
+		if (error) {
+			handler(NO,error,eventIdentifier);
+		}
+		else{
+			BOOL success = [self.eventStore removeEvent:event span:EKSpanThisEvent commit:YES error:&error];
+			handler(success,error,eventIdentifier);
+		}
+	}];
 }
 
 #pragma mark - Event search operations
 -(void)isEvent:(NSString *)eventIdentifier inCalendarWithSearchHandler:(eventSearchHandler)handler
 {
-	NSError *error = nil;
-	if (![JSCalendarManager calendarAccessGranted]) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarAccessNotGranted userInfo:[Helper errorInfoWithCode:kErrorCalendarAccessNotGranted]];
-		handler(NO,error,nil);
-		return;
-	}
-	
-	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
-	if (event) {
-		handler(YES,error,@[event]);
-	}else{
-		handler(NO,error,nil);
-	}
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error, EKEvent *event){
+		if (error) {
+			handler(NO,error,nil);
+		}
+		else{
+			handler(YES,error,@[event]);
+		}
+	}];
 }
 
 -(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler
@@ -465,23 +461,16 @@ typedef enum:NSInteger{
 
 -(void)addAlarmAt:(NSDate *)date forEvent:(NSString *)eventIdentifier completionHandler:(eventsOperationCompletionHandler)handler
 {
-	NSError *error = nil;
-	if (!self.calendar) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorCalendarDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorCalendarDoesNotExist]];
-		handler(NO,error,nil);
-		return;
-	}
-	
-	EKEvent *event = [self.eventStore eventWithIdentifier:eventIdentifier];
-	if (!event) {
-		error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorEventDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorEventDoesNotExist]];
-		handler(NO,error,eventIdentifier);
-		return;
-	}
-	
-	EKAlarm *alarm = [EKAlarm alarmWithAbsoluteDate:date];
-	[event addAlarm:alarm];
-	handler (YES,error,eventIdentifier);
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error,EKEvent *event){
+		if (error) {
+			handler(NO,error,eventIdentifier);
+		}
+		else{
+			EKAlarm *alarm = [EKAlarm alarmWithAbsoluteDate:date];
+			[event addAlarm:alarm];
+			handler (YES,error,eventIdentifier);
+		}
+	}];
 }
 
 -(NSArray *)alarmsForEvent:(NSString *)eventIdentifier
@@ -493,5 +482,22 @@ typedef enum:NSInteger{
 	else return nil;
 }
 
+-(void)removeAlarm:(EKAlarm *)alarm forEvent:(NSString *)eventIdentifier completionHanlder:(eventsOperationCompletionHandler)handler
+{
+	[self retrieveEvent:eventIdentifier completionHandler:^(NSError *error, EKEvent *event){
+		if (error) {
+			handler(NO,error,eventIdentifier);
+		}
+		else{
+			if ([event hasAlarms]) {
+				[event removeAlarm:alarm];
+				handler(YES,error,eventIdentifier);
+			}else{
+				error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorAlarmDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorAlarmDoesNotExist]];
+				handler(NO,error,eventIdentifier);
+			}
+		}
+	}];
+}
 
 @end
