@@ -301,9 +301,9 @@ Example:
 	}
 }];
 ```
-### Search events
+### Searching events
 You can search event(s) using the event identifiers or in a time range in the calendar database. The class provides two methods for this task.
-#### Search single event using its identifier
+#### Searching single event using its identifier
 You can use the method to search a give event with its identifier. The method is searching **all** calendars on the device.
 ```objective-C
 /*!
@@ -326,9 +326,25 @@ Example:
 }];
 ```
 
-#### Search events in a given time range
-The class provides a method to search events in a given time range. You need to specify the calendars (`NSArray* calendars`) to search in. Passing in `nil` to search all calendars.
+#### Searching events in a given time range
+The class provides two method to search events in a given time range. 
 
+You need to specify the calendars (`NSArray* calendars`) to search in. Passing in `nil` to search all calendars. This method allows you to search events in a time range in other calendars. So use with caution because you don't want to accidentally modify/delete user's other events.
+```objective-C
+/*!
+ @method     findEventsBetween: and: inCalendars: withSearchHandler:
+ @discussion Call this method to find all events in the specified date range in the specified calendars. This method allows to search other calendar, meaning you can change events in user's other calendar. So use with caution. If you just want to search the events in the calendar your app is using, use the methode below.
+ */
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end inCalendars:(NSArray *)calendars withSearchHandler:(eventSearchHandler)handler;
+```
+Another method will just search the events in the given date range in the calendar that your app currently working on. Of course, you have to call `[manager setUsingCalendar:calendarIdentifier]` before to specify this calendar. This method is safer, because if your app creates a calendar, and using that calendar, any modification doesn't affect user's other calendars and events.
+```objective-C
+/*!
+ @method     findEventsBetween: and: withSearchHandler:
+ @discussion Call this method to find all events in the specified date range in the calendar that currently is being used.
+ */
+-(void)findEventsBetween:(NSDate *)start and:(NSDate *)end withSearchHandler:(eventSearchHandler)handler;
+```
 
 ## Alarm operations
 You can using the class to add, retieve, or delete an alarm to an event. 
@@ -398,6 +414,8 @@ Example:
 	}
 }];
 ```
+## Example:
+A simple example to use this class in provided in the `CalendarManager.xcodeproj`.
 
 ## TODO:
 1. Add support for reminders.
