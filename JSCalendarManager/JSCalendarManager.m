@@ -472,7 +472,8 @@ typedef enum:NSInteger{
 		else{
 			EKAlarm *alarm = [EKAlarm alarmWithRelativeOffset:-minutes*60];
 			[event addAlarm:alarm];
-			handler (YES,error,eventIdentifier);
+			BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+			handler (success,error,eventIdentifier);
 		}
 	}];
 }
@@ -486,7 +487,8 @@ typedef enum:NSInteger{
 		else{
 			EKAlarm *alarm = [EKAlarm alarmWithAbsoluteDate:date];
 			[event addAlarm:alarm];
-			handler (YES,error,eventIdentifier);
+			BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+			handler (success,error,eventIdentifier);
 		}
 	}];
 }
@@ -509,7 +511,8 @@ typedef enum:NSInteger{
 		else{
 			if ([event hasAlarms]) {
 				[event removeAlarm:alarm];
-				handler(YES,error,eventIdentifier);
+				BOOL success = [self.eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&error];
+				handler(success,error,eventIdentifier);
 			}else{
 				error = [NSError errorWithDomain:JSCalendarManagerErrorDomain code:kErrorAlarmDoesNotExist userInfo:[Helper errorInfoWithCode:kErrorAlarmDoesNotExist]];
 				handler(NO,error,eventIdentifier);
